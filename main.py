@@ -1,6 +1,11 @@
-def main():
-    pass
+import sys
 
+from PyQt5.QtWidgets import QApplication
+
+from src.mainWindow import MainWindow
 
 if __name__ == '__main__':
-    main()
+    app = QApplication(sys.argv)
+    ex = MainWindow()
+    ex.show()
+    sys.exit(app.exec_())
