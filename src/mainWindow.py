@@ -11,12 +11,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         super().__init__()
         self.setupUi(self)
         self.connect_buttons()
-        self.horizontalScrollBar.hide()
-        self.verticalScrollBar.hide()
-        self.field = Field(self.centralwidget)
+        self.field = Field(self.scrollAreaWidgetContents)
         self.field.setObjectName("field")
-        self.gridLayout.addWidget(self.field, 0, 2, 1, 1)
-        self.field.setAlignment(QtCore.Qt.AlignCenter)
+        self.pictureHolder.addWidget(self.field, 0, 0, 1, 1)
 
     def connect_buttons(self):
         self.action_new.triggered.connect(self.new)
@@ -24,6 +21,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.action_save.triggered.connect(self.save)
 
     def new(self):
+        self.field.layers = []
         self.field.layers.append(Image.new('RGB', (200, 200), color=(255, 255, 255)))
         self.field.draw()
 
