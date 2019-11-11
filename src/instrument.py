@@ -25,3 +25,4 @@ class Instrument(QAction):
                 if i[1] == 'size':
                     p.brushSize.setValue(a)
         p.instrumentName.setText(self.objectName())
+        p.current_instrument = self.id
