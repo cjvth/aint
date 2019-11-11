@@ -11,7 +11,9 @@ class Field(QLabel):
         self.drawing_layer = None
 
     def draw(self):
-        if self.drawing_layer is None:
+        if len(self.layers) == 0:
+            pass
+        elif self.drawing_layer is None:
             self.setPixmap(QPixmap.fromImage(ImageQt(self.layers[0])))
         else:
             res = self.layers[0].copy()
@@ -21,9 +23,12 @@ class Field(QLabel):
             pass
 
     def new_drawing_layer(self):
-        self.drawing_layer = Image.new('RGBA', self.layers[0].size)
+        if len(self.layers) > 0:
+            self.drawing_layer = Image.new('RGBA', self.layers[0].size)
 
     def instrumented(self, i_id, x, y):
+        if self.drawing_layer is None:
+            return
         draw = ImageDraw.Draw(self.drawing_layer)
         p = self.parent()
         r = 5
@@ -34,5 +39,6 @@ class Field(QLabel):
         self.draw()
 
     def paste_drawing_layer(self):
-        self.layers[0].paste(self.drawing_layer.convert('RGB'), (0, 0), self.drawing_layer)
-        self.drawing_layer = None
+        if len(self.layers) > 0:
+            self.layers[0].paste(self.drawing_layer.convert('RGB'), (0, 0), self.drawing_layer)
+            self.drawing_layer = None

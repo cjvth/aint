@@ -28,6 +28,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.instrumentsBar.addAction(inst)
         self.current_instrument = 0
 
+        self.delta_x = 0
+        self.delta_y = 0
+
     def connect_buttons(self):
         self.action_new.triggered.connect(self.new)
         self.action_open.triggered.connect(self.open)
@@ -37,6 +40,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.field.layers = []
         self.field.layers.append(Image.new('RGB', (200, 200), color=(255, 255, 255)))
         self.field.draw()
+        self.update_deltas()
 
     def open(self):
         self.instrumented(50, 50)
@@ -48,12 +52,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if id == 0:  # Если будут инструменты, которые надо по-другому обрабатывать
             pass
         else:
-            sz = self.field.pixmap().size()
-            imho_geom = self.imHolder.geometry()
-            x -= imho_geom.x() + imho_geom.width() // 2 - (sz.width() + 1) // 2
-            y -= imho_geom.y() + imho_geom.height() // 2 - (sz.height() + 1) // 2 + \
-                self.menubar.height() + self.instrumentsBar.height()
-            self.field.instrumented(self.current_instrument, x, y)
+            self.field.instrumented(self.current_instrument, x - self.delta_x, y - self.delta_y)
 
     def mousePressEvent(self, event):
         self.field.new_drawing_layer()
@@ -64,3 +63,16 @@ class MainWindow(Ui_MainWindow, QMainWindow):
 
     def mouseReleaseEvent(self, event):
         self.field.paste_drawing_layer()
+
+    def update_deltas(self):
+        try:
+            sz = self.field.pixmap().size()
+        except AttributeError:
+            return
+        imho_geom = self.imHolder.geometry()
+        self.delta_x = imho_geom.x() + imho_geom.width() // 2 - (sz.width() + 1) // 2
+        self.delta_y = imho_geom.y() + imho_geom.height() // 2 - (sz.height() + 1) // 2 + \
+            self.menubar.height() + self.instrumentsBar.height()
+
+    def resizeEvent(self, event):
+        self.update_deltas()
