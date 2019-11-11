@@ -46,11 +46,22 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>592</width>
+         <width>607</width>
          <height>492</height>
         </rect>
        </property>
-       <layout class="QGridLayout" name="pictureHolder"/>
+       <layout class="QGridLayout" name="pictureHolder">
+        <item row="0" column="0">
+         <widget class="Field" name="field">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -70,7 +81,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>169</width>
+         <width>154</width>
          <height>492</height>
         </rect>
        </property>
@@ -114,23 +125,23 @@
             <height>70</height>
            </size>
           </property>
-          <widget class="QGraphicsView" name="backgroundColor">
+          <widget class="ClickableGraphicsView" name="backgroundColorChange">
            <property name="geometry">
             <rect>
              <x>20</x>
              <y>20</y>
-             <width>41</width>
-             <height>41</height>
+             <width>40</width>
+             <height>40</height>
             </rect>
            </property>
           </widget>
-          <widget class="QGraphicsView" name="foregroundColor">
+          <widget class="ClickableGraphicsView" name="foregroundColorChange">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>41</width>
-             <height>41</height>
+             <width>40</width>
+             <height>40</height>
             </rect>
            </property>
           </widget>
@@ -268,6 +279,18 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Field</class>
+   <extends>QLabel</extends>
+   <header>src/field</header>
+  </customwidget>
+  <customwidget>
+   <class>ClickableGraphicsView</class>
+   <extends>QGraphicsView</extends>
+   <header>src/clickableGraphicsView</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
