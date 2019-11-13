@@ -1,7 +1,9 @@
 from PIL import Image, ImageDraw
 from PIL.ImageQt import ImageQt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtWidgets import QLabel
+
+from src.colorChoose import ColorChoose
 
 
 class Field(QLabel):
@@ -9,6 +11,14 @@ class Field(QLabel):
         super().__init__(parent)
         self.layers = []
         self.drawing_layer = None
+        self.color_choose = None
+        self.mainWindow = None
+
+    def set_color_choose(self, color_choose: ColorChoose):
+        self.color_choose: ColorChoose = color_choose
+
+    def set_main_window(self, mw):
+        self.mainWindow = mw
 
     def draw(self):
         if len(self.layers) == 0:
@@ -30,12 +40,13 @@ class Field(QLabel):
         if self.drawing_layer is None:
             return
         draw = ImageDraw.Draw(self.drawing_layer)
-        p = self.parent()
-        r = 5
+        r = int(self.mainWindow.brushSize.text())
         if i_id == 1:
-            draw.ellipse((x - r, y - r, x + r, y + r), fill=(0, 0, 0))
+            color = self.color_choose.fore_color
+            draw.ellipse((x - r // 2, y - r // 2, x + (r + 1) // 2, y + (r + 1) // 2), fill=color)
         elif i_id == 2:
-            draw.ellipse((x - r, y - r, x + r, y + r), fill=(255, 255, 255))
+            color = self.color_choose.back_color
+            draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
         self.draw()
 
     def paste_drawing_layer(self):

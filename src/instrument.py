@@ -15,6 +15,7 @@ class Instrument(QAction):
             (p.colorChange, 'colorized'),
             (p.brushSizeChanger, 'size')
         ]
+        p.cur_inst = self.id
         cur = p.i_cur
         for i in options:
             a = cur.execute(f"SELECT {i[1]} FROM instruments WHERE id = {self.id}").fetchall()[0][0]
@@ -25,4 +26,3 @@ class Instrument(QAction):
                 if i[1] == 'size':
                     p.brushSize.setValue(a)
         p.instrumentName.setText(self.objectName())
-        p.current_instrument = self.id
