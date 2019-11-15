@@ -12,8 +12,8 @@ from src.colorChoose import ColorChoose
 class Field(QLabel):
     def __init__(self, parent):
         super().__init__(parent)
-        self.image = Image.new('RGB', (300, 300), (255, 255, 255))
-        self.image_draw = ImageDraw.Draw(self.image)
+        self.image = None
+        self.image_draw = None
         self.mainWindow = None
         self.color_choose = None
         self.drawer = Drawer(self)
@@ -21,7 +21,7 @@ class Field(QLabel):
         self.original_image = None
 
     def new_image(self):
-        self.image = Image.new('RGB', (300, 300), (255, 255, 255))
+        self.image = Image.new('RGBA', (300, 300), (255, 255, 255, 255))
         self.image_draw = ImageDraw.Draw(self.image)
         self.drawer.stop()
         self.inst_data = []
@@ -38,6 +38,8 @@ class Field(QLabel):
         self.setPixmap(QPixmap.fromImage(ImageQt(self.image)))
 
     def drawing_started(self, i_id, x, y):
+        if self.image is None:
+            return
         self.original_image = self.image.copy()
         if i_id == 5:
             self.inst_data = [(x, y)]
@@ -46,6 +48,8 @@ class Field(QLabel):
             self.drawer.start()
 
     def drawing_ended(self, i_id, x, y):
+        if self.image is None:
+            return
         self.drawer.stop()
         if i_id == 5:
             self.image_draw = ImageDraw.Draw(self.image)
@@ -67,7 +71,7 @@ class Field(QLabel):
             draw.line(self.inst_data[0] + (x, y), fill=self.color_choose.fore_color,
                       width=self.mainWindow.brushSize.value())
             self.image = self.original_image.copy()
-            self.image.paste(alpha.convert('RGB'), (0, 0), alpha)
+            self.image.paste(alpha, (0, 0), alpha)
 
 
 class Drawer(QThread):
