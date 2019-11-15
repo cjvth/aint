@@ -13,6 +13,7 @@ class Field(QLabel):
         self.drawing_layer = None
         self.color_choose = None
         self.mainWindow = None
+        self.inst_data = []
 
     def set_color_choose(self, color_choose: ColorChoose):
         self.color_choose: ColorChoose = color_choose
@@ -29,24 +30,34 @@ class Field(QLabel):
             res = self.layers[0].copy()
             res.paste(self.drawing_layer.convert('RGB'), (0, 0), self.drawing_layer)
             self.setPixmap(QPixmap.fromImage(ImageQt(res)))
-            a = res.load()
             pass
 
     def new_drawing_layer(self):
         if len(self.layers) > 0:
             self.drawing_layer = Image.new('RGBA', self.layers[0].size)
 
+    def drawing_started(self, i_id, x, y):
+        if i_id == 5:
+            self.inst_data = [(x, y)]
+
+    def drawing_ended(self, i_id, x, y):
+        pass
+
     def instrumented(self, i_id, x, y):
         if self.drawing_layer is None:
             return
-        draw = ImageDraw.Draw(self.drawing_layer)
-        r = int(self.mainWindow.brushSize.text())
-        if i_id == 1:
-            color = self.color_choose.fore_color
-            draw.ellipse((x - r // 2, y - r // 2, x + (r + 1) // 2, y + (r + 1) // 2), fill=color)
-        elif i_id == 2:
-            color = self.color_choose.back_color
-            draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+        if i_id in (1, 2):
+            draw = ImageDraw.Draw(self.drawing_layer)
+            r = int(self.mainWindow.brushSize.text()) / 2
+            if i_id == 1:
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=self.color_choose.fore_color)
+            elif i_id == 2:
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=self.color_choose.back_color)
+        elif i_id == 5:
+            self.drawing_layer = Image.new('RGBA', self.layers[0].size)
+            draw = ImageDraw.Draw(self.drawing_layer)
+            draw.line(self.inst_data[0] + (x, y), fill=self.color_choose.fore_color,
+                      width=self.mainWindow.brushSize.value())
         self.draw()
 
     def paste_drawing_layer(self):

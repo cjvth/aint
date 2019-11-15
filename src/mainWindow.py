@@ -58,17 +58,20 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if id == 0:  # Если будут инструменты, которые надо по-другому обрабатывать
             pass
         else:
-            self.field.instrumented(self.cur_inst, x - self.delta_x, y - self.delta_y)
+            self.field.instrumented(self.cur_inst, x, y)
 
     def mousePressEvent(self, event):
         self.field.new_drawing_layer()
-        self.instrumented(event.x(), event.y())
+        x, y = self.pixel_coords(event.x(), event.y())
+        self.field.drawing_started(self.cur_inst, x, y)
+        self.instrumented(x, y)
 
     def mouseMoveEvent(self, event):
-        self.instrumented(event.x(), event.y())
+        self.instrumented(*self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):
         self.field.paste_drawing_layer()
+        self.field.drawing_ended(self.cur_inst, *self.pixel_coords(event.x(), event.y()))
 
     def update_deltas(self):
         try:
@@ -82,3 +85,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
 
     def resizeEvent(self, event):
         self.update_deltas()
+
+    def pixel_coords(self, x, y):
+        return x - self.delta_x, y - self.delta_y
