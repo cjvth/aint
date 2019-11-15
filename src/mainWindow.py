@@ -1,6 +1,5 @@
 import sqlite3
 
-from PIL import Image
 from PyQt5.QtWidgets import QMainWindow
 
 from src.colorChoose import ColorChoose
@@ -28,8 +27,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
 
         self.colorChoose = ColorChoose(self.foregroundColorChange, self.backgroundColorChange,
                                        self.swapColors, self.i_cur, self.instruments_db)
-        self.field.set_color_choose(self.colorChoose)
-        self.field.set_main_window(self)
+        self.field.set_friends(self.colorChoose, self)
 
     def connect_events(self):
         self.action_new.triggered.connect(self.new)
@@ -38,9 +36,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.brushSize.valueChanged.connect(self.size_bd)
 
     def new(self):
-        self.field.layers = []
-        self.field.layers.append(Image.new('RGB', (200, 200), color=(255, 255, 255)))
-        self.field.draw()
+        self.field.new_image()
         self.update_deltas()
 
     def open(self):
@@ -61,7 +57,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.field.instrumented(self.cur_inst, x, y)
 
     def mousePressEvent(self, event):
-        self.field.new_drawing_layer()
         x, y = self.pixel_coords(event.x(), event.y())
         self.field.drawing_started(self.cur_inst, x, y)
         self.instrumented(x, y)
@@ -70,7 +65,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.instrumented(*self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):
-        self.field.paste_drawing_layer()
         self.field.drawing_ended(self.cur_inst, *self.pixel_coords(event.x(), event.y()))
 
     def update_deltas(self):
