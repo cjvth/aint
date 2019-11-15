@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw
 from PIL.ImageQt import ImageQt
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QComboBox
 
 from src.colorChoose import ColorChoose
 
@@ -68,8 +68,11 @@ class Field(QLabel):
         elif i_id == 5:
             alpha = Image.new('RGBA', self.image.size)
             draw = ImageDraw.Draw(alpha)
-            draw.line(self.inst_data[0] + (x, y), fill=self.color_choose.fore_color,
-                      width=self.mainWindow.brushSize.value())
+            # figure = self.mainWindow.figure.itemText()
+            figure = "Линия"
+            if figure == "Линия":
+                draw.line(self.inst_data[0] + (x, y), fill=self.color_choose.fore_color,
+                          width=self.mainWindow.brushSize.value())
             self.image = self.original_image.copy()
             self.image.paste(alpha, (0, 0), alpha)
 

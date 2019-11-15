@@ -27,17 +27,21 @@ class ColorChoose:
 
     def change_foreground(self):
         color = QColorDialog.getColor()
-        self.fore_scene.addRect(-5, -5, 37, 37, color, color)
-        self.fore_color = (color.red(), color.green(), color.blue())
-        self.cursor.execute(f"UPDATE color SET (r, g, b) = {self.fore_color} WHERE ground='fore'")
-        self.connect.commit()
+        if color.isValid():
+            self.fore_scene.addRect(-5, -5, 37, 37, color, color)
+            self.fore_color = (color.red(), color.green(), color.blue())
+            self.cursor.execute(f"""UPDATE color SET (r, g, b) = {self.fore_color} 
+                                    WHERE ground='fore'""")
+            self.connect.commit()
 
     def change_background(self):
         color = QColorDialog.getColor()
-        self.back_scene.addRect(-5, -5, 37, 37, color, color)
-        self.back_color = (color.red(), color.green(), color.blue())
-        self.cursor.execute(f"UPDATE color SET (r, g, b) = {self.back_color} WHERE ground='back'")
-        self.connect.commit()
+        if color.isValid():
+            self.back_scene.addRect(-5, -5, 37, 37, color, color)
+            self.back_color = (color.red(), color.green(), color.blue())
+            self.cursor.execute(f"""UPDATE color SET (r, g, b) = {self.back_color} 
+                                    WHERE ground='back'""")
+            self.connect.commit()
 
     def swap(self):
         self.fore_color, self.back_color = self.back_color, self.fore_color

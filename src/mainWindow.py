@@ -1,6 +1,7 @@
 import sqlite3
 
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMainWindow, QSplitter
 
 from src.colorChoose import ColorChoose
 from src.instrument import Instrument
@@ -15,19 +16,36 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.connect_events()
         self.instruments_db = sqlite3.connect('db/instruments.db')
         self.i_cur = self.instruments_db.cursor()
-        ins = self.i_cur.execute("SELECT id, name FROM instruments")
         self.instruments = []
-        for i in ins:
-            inst = Instrument(i[0], i[1], self)
-            self.instruments.append(inst)
-            self.instrumentsBar.addAction(inst)
+        self.init_instruments()
         self.cur_inst = 0
+        self.hide_options()
         self.delta_x = 0
         self.delta_y = 0
 
         self.colorChoose = ColorChoose(self.foregroundColorChange, self.backgroundColorChange,
                                        self.swapColors, self.i_cur, self.instruments_db)
         self.field.set_friends(self.colorChoose, self)
+
+        # self.options_image_splitter = QSplitter(Qt.Horizontal)
+        # self.options_image_splitter.addWidget(self.optionsHolder)
+        # self.options_image_splitter.addWidget(self.imHolder)
+
+    def init_instruments(self):
+        ins = self.i_cur.execute("SELECT id, name FROM instruments")
+        for i in ins:
+            inst = Instrument(i[0], i[1], self)
+            self.instruments.append(inst)
+            self.instrumentsBar.addAction(inst)
+
+    def hide_options(self):
+        options = [self.colorChanger,
+                   self.brushSizeChanger,
+                   self.figureChanger,
+                   self.figureFillChanger]
+        for i in options:
+            i.hide()
+        self.instrumentName.setText("")
 
     def connect_events(self):
         self.action_new.triggered.connect(self.new)

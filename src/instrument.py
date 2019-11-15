@@ -12,7 +12,7 @@ class Instrument(QAction):
         from src.mainWindow import MainWindow
         p: MainWindow = self.parent()
         options = [
-            (p.colorChange, 'colorized'),
+            (p.colorChanger, 'colorized'),
             (p.brushSizeChanger, 'size')
         ]
         p.cur_inst = self.id
