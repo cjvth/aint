@@ -73,17 +73,26 @@ class Field(QLabel):
             if figure == 0:
                 draw.line(self.inst_data[0] + [x, y], fill=self.color_choose.fore_color,
                           width=self.mainWindow.brushSize.value())
-            elif figure == 1:
-                draw.rectangle(self.inst_data[0] + [x, y], fill=self.color_choose.fore_color,
-                               width=self.mainWindow.brushSize.value())
-            elif figure == 2:
-                a = self.inst_data[0] + [x, y]
-                if a[0] > a[2]:
-                    a[0], a[2] = a[2], a[0]
-                if a[1] > a[3]:
-                    a[1], a[3] = a[3], a[1]
-                draw.ellipse(a, fill=self.color_choose.fore_color,
-                             width=self.mainWindow.brushSize.value())
+            elif figure in (1, 2):
+                if self.mainWindow.noFill.isChecked():
+                    fill = None
+                elif self.mainWindow.frontFill.isChecked():
+                    fill = self.color_choose.fore_color
+                else:
+                    fill = self.color_choose.back_color
+                if figure == 1:
+                    draw.rectangle(self.inst_data[0] + [x, y], fill=fill,
+                                   outline=self.color_choose.fore_color,
+                                   width=self.mainWindow.brushSize.value())
+                elif figure == 2:
+                    a = self.inst_data[0] + [x, y]
+                    if a[0] > a[2]:
+                        a[0], a[2] = a[2], a[0]
+                    if a[1] > a[3]:
+                        a[1], a[3] = a[3], a[1]
+                    draw.ellipse(self.inst_data[0] + [x, y], fill=fill,
+                                 outline=self.color_choose.fore_color,
+                                 width=self.mainWindow.brushSize.value())
             self.image = self.original_image.copy()
             self.image.paste(alpha, (0, 0), alpha)
             sleep(0.02)
