@@ -41,8 +41,7 @@ class Field(QLabel):
         if self.image is None:
             return
         self.original_image = self.image.copy()
-        if i_id == 5:
-            self.inst_data = [(x, y)]
+        self.inst_data = [(x, y)]
         self.drawer.working = True
         if not self.drawer.isRunning():
             self.drawer.start()
@@ -60,11 +59,13 @@ class Field(QLabel):
         if i_id in (1, 2):
             r = int(self.mainWindow.brushSize.text()) / 2
             if i_id == 1:
-                self.image_draw.ellipse((x - r, y - r, x + r, y + r),
-                                        fill=self.color_choose.fore_color)
-            elif i_id == 2:
-                self.image_draw.ellipse((x - r, y - r, x + r, y + r),
-                                        fill=self.color_choose.back_color)
+                color = self.color_choose.fore_color
+            else:
+                color = self.color_choose.back_color
+            self.image_draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+            self.image_draw.line(self.inst_data[0] + (x, y), fill=color,
+                                 width=self.mainWindow.brushSize.value())
+            self.inst_data[0] = (x, y)
         elif i_id == 5:
             alpha = Image.new('RGBA', self.image.size)
             draw = ImageDraw.Draw(alpha)
@@ -84,13 +85,10 @@ class Drawer(QThread):
         self.working = False
 
     def run(self):
-        while True:
-            if self.working:
-                self.field.setPixmap(QPixmap.fromImage(ImageQt(self.field.image)))
-                sleep(0.02)
-            else:
-                while not self.working:
-                    sleep(0.02)
+        while self.working:
+            self.field.setPixmap(QPixmap.fromImage(ImageQt(self.field.image)))
+            sleep(0.02)
+        self.field.setPixmap(QPixmap.fromImage(ImageQt(self.field.image)))
 
     def stop(self):
         self.working = False

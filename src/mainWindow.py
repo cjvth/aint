@@ -27,10 +27,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                                        self.swapColors, self.i_cur, self.instruments_db)
         self.field.set_friends(self.colorChoose, self)
 
-        # self.options_image_splitter = QSplitter(Qt.Horizontal)
-        # self.options_image_splitter.addWidget(self.optionsHolder)
-        # self.options_image_splitter.addWidget(self.imHolder)
-
     def init_instruments(self):
         ins = self.i_cur.execute("SELECT id, name FROM instruments")
         for i in ins:
