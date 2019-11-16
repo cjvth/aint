@@ -13,16 +13,17 @@ class Instrument(QAction):
         p: MainWindow = self.parent()
         options = [
             (p.colorChanger, 'colorized'),
-            (p.brushSizeChanger, 'size')
+            (p.brushSizeChanger, 'size', p.brushSize.setValue),
+            (p.figureChanger, 'figure', p.figure.setCurrentIndex)
         ]
-        p.cur_inst = self.id
-        cur = p.i_cur
+        p.curr_inst = self.id
+        cur = p.i_cursor
         for i in options:
             a = cur.execute(f"SELECT {i[1]} FROM instruments WHERE id = {self.id}").fetchall()[0][0]
             if a is None:
                 i[0].hide()
             else:
                 i[0].show()
-                if i[1] == 'size':
-                    p.brushSize.setValue(a)
+                if len(i) == 3:
+                    i[2](a)
         p.instrumentName.setText(self.objectName())

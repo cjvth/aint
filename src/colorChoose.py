@@ -7,9 +7,9 @@ from src.clickableGraphicsView import ClickableGraphicsView
 
 
 class ColorChoose:
-    def __init__(self, fore: ClickableGraphicsView, back: ClickableGraphicsView,
-                 swap: QPushButton, cursor: sqlite3.Cursor, connect):
-        self.connect = connect
+    def __init__(self, fore: ClickableGraphicsView, back: ClickableGraphicsView, swap: QPushButton,
+                 connection, cursor: sqlite3.Cursor):
+        self.connect = connection
         self.cursor = cursor
         self.fore_scene = QGraphicsScene(fore.parent())
         fore.setScene(self.fore_scene)

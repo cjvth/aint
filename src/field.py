@@ -41,7 +41,7 @@ class Field(QLabel):
         if self.image is None:
             return
         self.original_image = self.image.copy()
-        self.inst_data = [(x, y)]
+        self.inst_data = [[x, y]]
         self.drawer.working = True
         if not self.drawer.isRunning():
             self.drawer.start()
@@ -63,19 +63,30 @@ class Field(QLabel):
             else:
                 color = self.color_choose.back_color
             self.image_draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
-            self.image_draw.line(self.inst_data[0] + (x, y), fill=color,
+            self.image_draw.line(self.inst_data[0] + [x, y], fill=color,
                                  width=self.mainWindow.brushSize.value())
-            self.inst_data[0] = (x, y)
+            self.inst_data[0] = [x, y]
         elif i_id == 5:
             alpha = Image.new('RGBA', self.image.size)
             draw = ImageDraw.Draw(alpha)
-            # figure = self.mainWindow.figure.itemText()
-            figure = "Линия"
-            if figure == "Линия":
-                draw.line(self.inst_data[0] + (x, y), fill=self.color_choose.fore_color,
+            figure = self.mainWindow.figure.currentIndex()
+            if figure == 0:
+                draw.line(self.inst_data[0] + [x, y], fill=self.color_choose.fore_color,
                           width=self.mainWindow.brushSize.value())
+            elif figure == 1:
+                draw.rectangle(self.inst_data[0] + [x, y], fill=self.color_choose.fore_color,
+                               width=self.mainWindow.brushSize.value())
+            elif figure == 2:
+                a = self.inst_data[0] + [x, y]
+                if a[0] > a[2]:
+                    a[0], a[2] = a[2], a[0]
+                if a[1] > a[3]:
+                    a[1], a[3] = a[3], a[1]
+                draw.ellipse(a, fill=self.color_choose.fore_color,
+                             width=self.mainWindow.brushSize.value())
             self.image = self.original_image.copy()
             self.image.paste(alpha, (0, 0), alpha)
+            sleep(0.02)
 
 
 class Drawer(QThread):
@@ -88,6 +99,7 @@ class Drawer(QThread):
         while self.working:
             self.field.setPixmap(QPixmap.fromImage(ImageQt(self.field.image)))
             sleep(0.02)
+        sleep(0.02)
         self.field.setPixmap(QPixmap.fromImage(ImageQt(self.field.image)))
 
     def stop(self):

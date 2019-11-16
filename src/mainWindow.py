@@ -1,10 +1,10 @@
 import sqlite3
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QSplitter
+from PyQt5.QtWidgets import QMainWindow
 
 from src.colorChoose import ColorChoose
 from src.instrument import Instrument
+from src.optionsPreferences import OptionsPreferences
 from ui.mainWindowUI import Ui_MainWindow
 
 
@@ -14,40 +14,44 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.setupUi(self)
 
         self.connect_events()
-        self.instruments_db = sqlite3.connect('db/instruments.db')
-        self.i_cur = self.instruments_db.cursor()
+        self.i_db = sqlite3.connect('db/instruments.db')
+        self.i_cursor = self.i_db.cursor()
         self.instruments = []
         self.init_instruments()
-        self.cur_inst = 0
-        self.hide_options()
+        self.curr_inst = 0
+        self.init_options()
         self.delta_x = 0
         self.delta_y = 0
 
+        self.op = OptionsPreferences(self, self.i_db, self.i_cursor)
         self.colorChoose = ColorChoose(self.foregroundColorChange, self.backgroundColorChange,
-                                       self.swapColors, self.i_cur, self.instruments_db)
+                                       self.swapColors, self.i_db, self.i_cursor)
         self.field.set_friends(self.colorChoose, self)
 
     def init_instruments(self):
-        ins = self.i_cur.execute("SELECT id, name FROM instruments")
+        ins = self.i_cursor.execute("SELECT id, name FROM instruments")
         for i in ins:
             inst = Instrument(i[0], i[1], self)
             self.instruments.append(inst)
             self.instrumentsBar.addAction(inst)
 
-    def hide_options(self):
+    def init_options(self):
         options = [self.colorChanger,
                    self.brushSizeChanger,
                    self.figureChanger,
-                   self.figureFillChanger]
+                   self.figureFillChanger
+                   ]
         for i in options:
             i.hide()
+        figures = self.i_cursor.execute("SELECT name, id FROM figures").fetchall()
+        for i in figures:
+            self.figure.addItem(i[0], i[1])
         self.instrumentName.setText("")
 
     def connect_events(self):
         self.action_new.triggered.connect(self.new)
         self.action_open.triggered.connect(self.open)
         self.action_save.triggered.connect(self.save)
-        self.brushSize.valueChanged.connect(self.size_bd)
 
     def new(self):
         self.field.new_image()
@@ -59,27 +63,22 @@ class MainWindow(Ui_MainWindow, QMainWindow):
     def save(self):
         pass
 
-    def size_bd(self):
-        x = self.brushSize.value()
-        self.i_cur.execute(f"UPDATE instruments SET size = {x} WHERE id = {self.cur_inst}")
-        self.instruments_db.commit()
-
     def instrumented(self, x, y):
         if id == 0:  # Если будут инструменты, которые надо по-другому обрабатывать
             pass
         else:
-            self.field.instrumented(self.cur_inst, x, y)
+            self.field.instrumented(self.curr_inst, x, y)
 
     def mousePressEvent(self, event):
         x, y = self.pixel_coords(event.x(), event.y())
-        self.field.drawing_started(self.cur_inst, x, y)
+        self.field.drawing_started(self.curr_inst, x, y)
         self.instrumented(x, y)
 
     def mouseMoveEvent(self, event):
         self.instrumented(*self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):
-        self.field.drawing_ended(self.cur_inst, *self.pixel_coords(event.x(), event.y()))
+        self.field.drawing_ended(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
 
     def update_deltas(self):
         try:
