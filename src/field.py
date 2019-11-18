@@ -21,7 +21,7 @@ class Field(QLabel):
         self.original_image = None
 
     def new_image(self):
-        self.image = Image.new('RGBA', (300, 300), (255, 255, 255, 255))
+        self.image = Image.new('RGBA', (500, 500), (255, 255, 255, 255))
         self.image_draw = ImageDraw.Draw(self.image)
         self.drawer.stop()
         self.inst_data = []
@@ -54,15 +54,16 @@ class Field(QLabel):
             self.image_draw = ImageDraw.Draw(self.image)
 
     def instrumented(self, i_id, x, y):
-        if self.image is None:
+        if self.image is None or len(self.inst_data) == 0:
             return
         if i_id in (1, 2):
-            r = int(self.mainWindow.brushSize.text()) / 2
+            r = self.mainWindow.brushSize.value()
             if i_id == 1:
                 color = self.color_choose.fore_color
             else:
                 color = self.color_choose.back_color
-            self.image_draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+            self.image_draw.ellipse((x - (r - 1) // 2, y - (r - 1) // 2, x + r // 2, y + r // 2),
+                                    fill=color)
             self.image_draw.line(self.inst_data[0] + [x, y], fill=color,
                                  width=self.mainWindow.brushSize.value())
             self.inst_data[0] = [x, y]
