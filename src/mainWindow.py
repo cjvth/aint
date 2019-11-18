@@ -1,7 +1,8 @@
 import sqlite3
 
+from PIL import Image
 from PyQt5.QtCore import QThread
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
 from src.colorChoose import ColorChoose
 from src.instrument import Instrument
@@ -50,6 +51,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         figures = self.i_cursor.execute("SELECT name, id FROM figures").fetchall()
         for i in figures:
             self.figure.addItem(i[0], i[1])
+        self.figure.setCurrentIndex(-1)
         self.instrumentName.setText("")
 
     def connect_events(self):
@@ -61,14 +63,54 @@ class MainWindow(Ui_MainWindow, QMainWindow):
 
     def new(self):
         self.field.new_image()
-        self.update_delta_x()
-        self.update_delta_y()
+        self.must_update_deltas = True
 
     def open(self):
-        self.instrumented(50, 50)
+        f = '*.bmp *.eps *.gif *.icns *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
+        filename = QFileDialog.getOpenFileName(self, 'Открыть', './imsave/im.', filter=f)
+        if filename[1] == '':
+            return
+        split = filename[0].split('/')[-1].split('\\')[-1].split('.')
+        if split[0] == '' or len(split) > 1 and split[-1] == '':
+            self.statusbar.showMessage('Ошибка: не задано имя файла', 5000)
+            return
+        try:
+            im: Image.Image = Image.open(filename[0])
+            im = im.convert('RGBA')
+        except FileNotFoundError:
+            self.statusbar.showMessage('Файл не найден', 5000)
+            return
+        self.field.open_image(im)
+        self.must_update_deltas = True
 
     def save(self):
-        pass
+        f = '*.bmp *.eps *.gif *.icns *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
+        filename = QFileDialog.getSaveFileName(self, 'Сохранить', './imsave/im.', filter=f)
+        if filename[1] == '':
+            return
+        split = filename[0].split('/')[-1].split('\\')[-1].split('.')
+        if split[0] == '':
+            self.statusbar.showMessage('Ошибка: не задано имя файла', 5000)
+            return
+        elif len(split) == 1:
+            filename = (filename[0] + '.png', filename[1])
+        elif split[-1] == '':
+            filename = (filename[0][:-1] + '.png', filename[1])
+        im: Image.Image = self.field.image
+        try:
+            im.save(filename[0])
+        except FileNotFoundError:
+            # Символ / воспринимается как разделитель папки
+            self.statusbar.showMessage('Ошибка: использование запрещённых символов', 5000)
+        except (ValueError, OSError):
+            try:
+                im.convert('RGBA').save(filename[0])
+            except (ValueError, OSError):
+                im.convert('RGB').save(filename[0])
+        except AttributeError:
+            self.statusbar.showMessage('Ошибка: файл не создан', 5000)
+        except ValueError:
+            self.statusbar.showMessage('Ошибка: неизвестное расширение файла', 5000)
 
     def instrumented(self, x, y):
         self.field.instrumented(self.curr_inst, x, y)

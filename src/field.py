@@ -28,6 +28,14 @@ class Field(QLabel):
         self.original_image = None
         self.draw()
 
+    def open_image(self, im):
+        self.image = im
+        self.image_draw = ImageDraw.Draw(self.image)
+        self.drawer.stop()
+        self.inst_data = []
+        self.original_image = None
+        self.draw()
+
     def set_friends(self, color_choose: ColorChoose, mw):
         self.color_choose = color_choose
         self.mainWindow = mw

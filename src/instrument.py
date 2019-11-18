@@ -14,8 +14,8 @@ class Instrument(QAction):
         options = [
             (p.colorChanger, 'colorized'),
             (p.brushSizeChanger, 'size', p.brushSize.setValue),
-            (p.figureChanger, 'figure', p.figure.setCurrentIndex),
-            (p.figureFillChanger, 'figure')
+            (p.figureFillChanger, 'figure'),
+            (p.figureChanger, 'figure', p.figure.setCurrentIndex)
         ]
         p.curr_inst = self.id
         cur = p.i_cursor
