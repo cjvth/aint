@@ -14,11 +14,15 @@ class Field(QLabel):
         super().__init__(parent)
         self.image = None
         self.image_draw = None
-        self.mainWindow = None
+        from src.mainWindow import MainWindow
+        # noinspection PyTypeChecker
+        self.mainWindow: MainWindow = None
         self.color_choose = None
         self.drawer = Drawer(self)
         self.inst_data = []
         self.original_image = None
+        self.history = []
+        self.history_pos = 0
 
     def new_image(self):
         self.image = Image.new('RGBA', (500, 500), (255, 255, 255, 255))
@@ -27,6 +31,10 @@ class Field(QLabel):
         self.inst_data = []
         self.original_image = None
         self.draw()
+        self.history = [self.image.copy()]
+        self.history_pos = 0
+        self.mainWindow.action_undo.setDisabled(True)
+        self.mainWindow.action_redo.setDisabled(True)
 
     def open_image(self, im):
         self.image = im
@@ -35,10 +43,16 @@ class Field(QLabel):
         self.inst_data = []
         self.original_image = None
         self.draw()
+        self.history = [self.image.copy()]
+        self.history_pos = 0
+        self.mainWindow.action_undo.setDisabled(True)
+        self.mainWindow.action_redo.setDisabled(True)
 
     def set_friends(self, color_choose: ColorChoose, mw):
         self.color_choose = color_choose
         self.mainWindow = mw
+        self.mainWindow.action_undo.setDisabled(True)
+        self.mainWindow.action_redo.setDisabled(True)
 
     def draw(self):
         if self.image is None:
@@ -54,12 +68,24 @@ class Field(QLabel):
         if not self.drawer.isRunning():
             self.drawer.start()
 
-    def drawing_ended(self, i_id, x, y):
+    def drawing_ended(self, i_id, x, y, cancel=False):
+        if cancel:
+            sleep(0.01)
+            self.image = self.original_image
+            self.image_draw = ImageDraw.Draw(self.image)
+            return
         if self.image is None:
             return
         self.drawer.stop()
         if i_id == 5:
             self.image_draw = ImageDraw.Draw(self.image)
+        if not self.image == self.history[self.history_pos]:
+            self.history = [self.image.copy()] + self.history[self.history_pos:]
+            self.history = self.history[:10]
+            self.history_pos = 0
+            self.mainWindow.action_undo.setEnabled(True)
+            self.mainWindow.action_redo.setDisabled(True)
+        self.original_image = None
 
     def instrumented(self, i_id, x, y):
         if self.image is None or len(self.inst_data) == 0:
@@ -105,6 +131,28 @@ class Field(QLabel):
             self.image = self.original_image.copy()
             self.image.paste(alpha, (0, 0), alpha)
             sleep(0.02)
+
+    def undo(self):
+        if len(self.history) > self.history_pos + 1:
+            self.history_pos += 1
+            self.image = self.history[self.history_pos].copy()
+            self.image_draw = ImageDraw.Draw(self.image)
+            self.original_image = None
+            self.draw()
+            self.mainWindow.action_redo.setEnabled(True)
+            if len(self.history) <= self.history_pos + 1:
+                self.mainWindow.action_undo.setDisabled(True)
+
+    def redo(self):
+        if self.history_pos > 0:
+            self.history_pos -= 1
+            self.image = self.history[self.history_pos].copy()
+            self.image_draw = ImageDraw.Draw(self.image)
+            self.original_image = None
+            self.draw()
+            self.mainWindow.action_undo.setEnabled(True)
+            if self.history_pos <= 0:
+                self.mainWindow.action_redo.setDisabled(True)
 
 
 class Drawer(QThread):

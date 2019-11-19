@@ -1,7 +1,7 @@
 import sqlite3
 
 from PIL import Image
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, Qt
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
 from src.colorChoose import ColorChoose
@@ -39,6 +39,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             inst = Instrument(i[0], i[1], self)
             self.instruments.append(inst)
             self.instrumentsBar.addAction(inst)
+            if i[0] <= 10:
+                inst.setShortcut('CTRL+' + str(i[0] % 10))
 
     def init_options(self):
         options = [self.colorChanger,
@@ -58,6 +60,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.action_new.triggered.connect(self.new)
         self.action_open.triggered.connect(self.open)
         self.action_save.triggered.connect(self.save)
+        self.action_undo.triggered.connect(self.field.undo)
+        self.action_redo.triggered.connect(self.field.redo)
         self.imHolder.verticalScrollBar().valueChanged.connect(self.update_delta_y)
         self.imHolder.horizontalScrollBar().valueChanged.connect(self.update_delta_x)
 
@@ -116,20 +120,24 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.field.instrumented(self.curr_inst, x, y)
 
     def mousePressEvent(self, event):
-        if self.imHolder.x() <= event.x() <= self.imHolder.x() + self.imHolder.width() and \
-                self.imHolder.y() <= event.y() - self.menubar.height() - \
-                self.instrumentsBar.height() <= self.imHolder.y() + self.imHolder.height():
-            self.drawing = True
-        else:
+        if event.button() == Qt.RightButton:
             self.drawing = False
-            return
-        if self.must_update_deltas:
-            self.update_delta_x()
-            self.update_delta_y()
-            self.must_update_deltas = False
-        x, y = self.pixel_coords(event.x(), event.y())
-        self.field.drawing_started(self.curr_inst, x, y)
-        self.instrumented(x, y)
+            self.field.drawing_ended(self.curr_inst, 0, 0, True)
+        elif event.button() == Qt.LeftButton:
+            if self.imHolder.x() <= event.x() <= self.imHolder.x() + self.imHolder.width() and \
+                    self.imHolder.y() <= event.y() - self.menubar.height() - \
+                    self.instrumentsBar.height() <= self.imHolder.y() + self.imHolder.height():
+                self.drawing = True
+            else:
+                self.drawing = False
+                return
+            if self.must_update_deltas:
+                self.update_delta_x()
+                self.update_delta_y()
+                self.must_update_deltas = False
+            x, y = self.pixel_coords(event.x(), event.y())
+            self.field.drawing_started(self.curr_inst, x, y)
+            self.instrumented(x, y)
 
     def mouseMoveEvent(self, event):
         if not self.drawing:
@@ -150,7 +158,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.instrumented(*self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):
-        self.field.drawing_ended(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
+        if self.drawing:
+            self.field.drawing_ended(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
         self.drawing = False
 
     def update_delta_x(self):

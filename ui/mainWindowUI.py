@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'ui/MainWindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.2
+# Created by: PyQt5 UI code generator 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -153,6 +155,8 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
+        self.menu_2 = QtWidgets.QMenu(self.menubar)
+        self.menu_2.setObjectName("menu_2")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -167,10 +171,17 @@ class Ui_MainWindow(object):
         self.action_open.setObjectName("action_open")
         self.action_save = QtWidgets.QAction(MainWindow)
         self.action_save.setObjectName("action_save")
+        self.action_undo = QtWidgets.QAction(MainWindow)
+        self.action_undo.setObjectName("action_undo")
+        self.action_redo = QtWidgets.QAction(MainWindow)
+        self.action_redo.setObjectName("action_redo")
         self.menu.addAction(self.action_new)
         self.menu.addAction(self.action_open)
         self.menu.addAction(self.action_save)
+        self.menu_2.addAction(self.action_undo)
+        self.menu_2.addAction(self.action_redo)
         self.menubar.addAction(self.menu.menuAction())
+        self.menubar.addAction(self.menu_2.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -187,6 +198,7 @@ class Ui_MainWindow(object):
         self.frontFill.setText(_translate("MainWindow", "Передний план"))
         self.backFill.setText(_translate("MainWindow", "Задний план"))
         self.menu.setTitle(_translate("MainWindow", "Файл"))
+        self.menu_2.setTitle(_translate("MainWindow", "Правка"))
         self.instrumentsBar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.action_new.setText(_translate("MainWindow", "Новый"))
         self.action_new.setToolTip(_translate("MainWindow", "Новый"))
@@ -195,6 +207,9 @@ class Ui_MainWindow(object):
         self.action_open.setShortcut(_translate("MainWindow", "Ctrl+O"))
         self.action_save.setText(_translate("MainWindow", "Сохранить"))
         self.action_save.setShortcut(_translate("MainWindow", "Ctrl+S"))
-
+        self.action_undo.setText(_translate("MainWindow", "Отменить"))
+        self.action_undo.setShortcut(_translate("MainWindow", "Ctrl+Z"))
+        self.action_redo.setText(_translate("MainWindow", "Повторить"))
+        self.action_redo.setShortcut(_translate("MainWindow", "Ctrl+Y"))
 from src.clickableGraphicsView import ClickableGraphicsView
 from src.field import Field
