@@ -26,6 +26,8 @@ class OptionsPreferences:
     def figure(self):
         """figure current index changed"""
         x = self.mw.figure.currentIndex()
+        if x < 0:
+            return
         a = self.cur.execute(f"SELECT fill FROM figures WHERE id = {x}").fetchall()[0][0]
         if a is not None:
             self.mw.figureFillChanger.show()

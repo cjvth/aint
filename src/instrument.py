@@ -28,6 +28,7 @@ class Instrument(QAction):
             (p.figureFillChanger, 'figure'),
             (p.figureChanger, 'figure', p.figure.setCurrentIndex)
         ]
+        p.figure.setCurrentIndex(-1)
         p.curr_inst = self.id
         cur = p.i_cursor
         for i in options:

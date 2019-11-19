@@ -108,7 +108,7 @@ class Field(QLabel):
         if self.image is None:
             return
         self.drawer.stop()
-        if i_id == 5:
+        if i_id == 3:
             self.image_draw = ImageDraw.Draw(self.image)
         if not self.image == self.history[self.history_pos]:
             self.history = [self.image.copy()] + self.history[self.history_pos:]
