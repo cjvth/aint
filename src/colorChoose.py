@@ -1,7 +1,7 @@
 import sqlite3
 
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QPushButton, QGraphicsView, QWidget, QColorDialog, QGraphicsScene
+from PyQt5.QtWidgets import QPushButton, QColorDialog, QGraphicsScene
 
 from src.clickableGraphicsView import ClickableGraphicsView
 
@@ -17,6 +17,7 @@ class ColorChoose:
         back.setScene(self.back_scene)
         fore.clicked.connect(self.change_foreground)
         back.clicked.connect(self.change_background)
+        # noinspection PyUnresolvedReferences
         swap.clicked.connect(self.swap)
         self.fore_color = self.cursor.execute("""SELECT r, g, b FROM color
         WHERE ground='fore'""").fetchall()[0]

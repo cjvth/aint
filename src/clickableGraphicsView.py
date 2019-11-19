@@ -9,4 +9,5 @@ class ClickableGraphicsView(QGraphicsView):
         super().__init__(parent)
 
     def mousePressEvent(self, event):
+        # noinspection PyUnresolvedReferences
         self.clicked.emit()

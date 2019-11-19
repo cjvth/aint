@@ -5,11 +5,13 @@ class Instrument(QAction):
     def __init__(self, id_, name, parent):
         super().__init__(name, parent)
         self.id = id_
+        # noinspection PyUnresolvedReferences
         self.triggered.connect(self.chosen)
         self.setObjectName(name)
 
     def chosen(self):
         from src.mainWindow import MainWindow
+        # noinspection PyTypeChecker
         p: MainWindow = self.parent()
         options = [
             (p.colorChanger, 'colorized'),

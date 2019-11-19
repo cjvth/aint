@@ -2,7 +2,7 @@ import sqlite3
 
 from PIL import Image
 from PyQt5.QtCore import QThread, Qt
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QInputDialog
 
 from src.colorChoose import ColorChoose
 from src.instrument import Instrument
@@ -66,12 +66,22 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.imHolder.horizontalScrollBar().valueChanged.connect(self.update_delta_x)
 
     def new(self):
-        self.field.new_image()
+        width = QInputDialog().getInt(self, 'Ширина', 'Ширина')
+        while width[0] < 1:
+            if not width[1]:
+                return
+            width = QInputDialog().getInt(self, 'Ширина', 'Ширина')
+        height = QInputDialog().getInt(self, 'Высота', 'Высота')
+        while height[0] < 1:
+            if not height[1]:
+                return
+            height = QInputDialog().getInt(self, 'Высота', 'Высота')
+        self.field.new_image(width[0], height[0])
         self.must_update_deltas = True
 
     def open(self):
-        f = '*.bmp *.eps *.gif *.icns *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
-        filename = QFileDialog.getOpenFileName(self, 'Открыть', './imsave/im.', filter=f)
+        filt = '*.bmp *.eps *.gif *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
+        filename = QFileDialog.getOpenFileName(self, 'Открыть', '', filter=filt)
         if filename[1] == '':
             return
         split = filename[0].split('/')[-1].split('\\')[-1].split('.')
@@ -88,8 +98,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.must_update_deltas = True
 
     def save(self):
-        f = '*.bmp *.eps *.gif *.icns *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
-        filename = QFileDialog.getSaveFileName(self, 'Сохранить', './imsave/im.', filter=f)
+        filt = '*.bmp *.eps *.gif *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
+        filename = QFileDialog.getSaveFileName(self, 'Сохранить', '', filter=filt)
         if filename[1] == '':
             return
         split = filename[0].split('/')[-1].split('\\')[-1].split('.')

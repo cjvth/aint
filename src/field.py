@@ -4,11 +4,12 @@ from PIL import Image, ImageDraw
 from PIL.ImageQt import ImageQt
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QLabel, QComboBox
+from PyQt5.QtWidgets import QLabel
 
 from src.colorChoose import ColorChoose
 
 
+# noinspection PyUnusedLocal
 class Field(QLabel):
     def __init__(self, parent):
         super().__init__(parent)
@@ -24,17 +25,9 @@ class Field(QLabel):
         self.history = []
         self.history_pos = 0
 
-    def new_image(self):
-        self.image = Image.new('RGBA', (500, 500), (255, 255, 255, 255))
-        self.image_draw = ImageDraw.Draw(self.image)
-        self.drawer.stop()
-        self.inst_data = []
-        self.original_image = None
-        self.draw()
-        self.history = [self.image.copy()]
-        self.history_pos = 0
-        self.mainWindow.action_undo.setDisabled(True)
-        self.mainWindow.action_redo.setDisabled(True)
+    def new_image(self, width, height):
+        self.image = Image.new('RGBA', (width, height), (255, 255, 255, 255))
+        self.open_image(self.image)
 
     def open_image(self, im):
         self.image = im
