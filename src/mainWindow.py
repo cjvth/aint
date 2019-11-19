@@ -137,6 +137,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         except FileNotFoundError:
             # Символ / воспринимается как разделитель папки
             self.statusbar.showMessage('Ошибка: использование запрещённых символов', 5000)
+        except (KeyError, ValueError):
+            self.statusbar.showMessage('Ошибка: неизвестное расширение файла', 5000)
         except (ValueError, OSError):
             try:
                 im.convert('RGBA').save(filename[0])
@@ -144,8 +146,6 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 im.convert('RGB').save(filename[0])
         except AttributeError:
             self.statusbar.showMessage('Ошибка: файл не создан', 5000)
-        except ValueError:
-            self.statusbar.showMessage('Ошибка: неизвестное расширение файла', 5000)
 
     def mousePressEvent(self, event):
         """
@@ -155,6 +155,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         if event.button() == Qt.RightButton:
             self.drawing = False
             self.field.drawing_ended(self.curr_inst, 0, 0, True)
+        #   if right button pressed, abort drawing
         elif event.button() == Qt.LeftButton:
             if self.imHolder.x() <= event.x() <= self.imHolder.x() + self.imHolder.width() and \
                     self.imHolder.y() <= event.y() - self.menubar.height() - \
@@ -180,6 +181,8 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             return
         x, y = self.pixel_coords(event.x(), event.y())
         hor = self.imHolder.horizontalScrollBar()
+
+        # Move the scroll area when mouse goes out of the border
         if hor.isVisible():
             if x < hor.value():
                 hor.setValue(x)
@@ -191,6 +194,7 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 ver.setValue(y)
             elif y >= ver.value() + ver.pageStep():
                 ver.setValue(y - ver.pageStep())
+
         self.field.instrumented(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):

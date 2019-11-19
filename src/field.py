@@ -128,7 +128,7 @@ class Field(QLabel):
         """
         if self.image is None or len(self.inst_data) == 0:
             return
-        if i_id in (1, 2):
+        if i_id in (1, 2):  # Brush and eraser
             r = self.mainWindow.brushSize.value()
             if i_id == 1:
                 color = self.color_choose.fore_color
@@ -139,7 +139,7 @@ class Field(QLabel):
             self.image_draw.line(self.inst_data[0] + [x, y], fill=color,
                                  width=self.mainWindow.brushSize.value())
             self.inst_data[0] = [x, y]
-        elif i_id == 3:
+        elif i_id == 3:  # Figures
             alpha = Image.new('RGBA', self.image.size)
             draw = ImageDraw.Draw(alpha)
             figure = self.mainWindow.figure.currentIndex()
@@ -158,12 +158,13 @@ class Field(QLabel):
                                    outline=self.color_choose.fore_color,
                                    width=self.mainWindow.brushSize.value())
                 elif figure == 2:
+                    # Ellipse doesn't want to grow not right and down
                     a = self.inst_data[0] + [x, y]
                     if a[0] > a[2]:
                         a[0], a[2] = a[2], a[0]
                     if a[1] > a[3]:
                         a[1], a[3] = a[3], a[1]
-                    draw.ellipse(self.inst_data[0] + [x, y], fill=fill,
+                    draw.ellipse(a, fill=fill,
                                  outline=self.color_choose.fore_color,
                                  width=self.mainWindow.brushSize.value())
             self.image = self.original_image.copy()
