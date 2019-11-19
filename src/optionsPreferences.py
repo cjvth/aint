@@ -1,5 +1,13 @@
 class OptionsPreferences:
+    """
+    Class for saving (and a little loading) instrument options to the database
+    """
     def __init__(self, main_window, connection, cursor):
+        """
+        :param main_window: main window
+        :param connection: database connection
+        :param cursor: connection cursor
+        """
         from src.mainWindow import MainWindow
         self.mw: MainWindow = main_window
         self.con = connection
@@ -10,11 +18,13 @@ class OptionsPreferences:
         self.mw.figureFillChangerGroup.buttonClicked.connect(self.figure_fill_changer_group)
 
     def brush_size(self):
+        """brushSize value changed"""
         x = self.mw.brushSize.value()
         self.cur.execute(f"UPDATE instruments SET size = {x} WHERE id = {self.mw.curr_inst}")
         self.con.commit()
 
     def figure(self):
+        """figure current index changed"""
         x = self.mw.figure.currentIndex()
         a = self.cur.execute(f"SELECT fill FROM figures WHERE id = {x}").fetchall()[0][0]
         if a is not None:
@@ -31,6 +41,7 @@ class OptionsPreferences:
         self.con.commit()
 
     def figure_fill_changer_group(self, chosen):
+        """figureFillGroup some radio button is chosen"""
         if chosen is self.mw.noFill:
             x = 0
         elif chosen is self.mw.frontFill:

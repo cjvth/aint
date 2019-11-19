@@ -1,7 +1,7 @@
 import sqlite3
 
 from PIL import Image
-from PyQt5.QtCore import QThread, Qt
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QInputDialog
 
 from src.colorChoose import ColorChoose
@@ -11,6 +11,9 @@ from ui.mainWindowUI import Ui_MainWindow
 
 
 class MainWindow(Ui_MainWindow, QMainWindow):
+    """
+    Main window class
+    """
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -34,6 +37,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.field.set_friends(self.colorChoose, self)
 
     def init_instruments(self):
+        """
+        Initializing instruments (these buttons in the top) from database
+        """
         ins = self.i_cursor.execute("SELECT id, name FROM instruments")
         for i in ins:
             inst = Instrument(i[0], i[1], self)
@@ -43,6 +49,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 inst.setShortcut('CTRL+' + str(i[0] % 10))
 
     def init_options(self):
+        """
+        Initializing options for the instruments, also from db
+        """
         options = [self.colorChanger,
                    self.brushSizeChanger,
                    self.figureChanger,
@@ -57,6 +66,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.instrumentName.setText("")
 
     def connect_events(self):
+        """
+        Connecting some events and functions for them
+        """
         self.action_new.triggered.connect(self.new)
         self.action_open.triggered.connect(self.open)
         self.action_save.triggered.connect(self.save)
@@ -66,6 +78,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.imHolder.horizontalScrollBar().valueChanged.connect(self.update_delta_x)
 
     def new(self):
+        """
+        Gets width and height for a new image and makes it
+        """
         width = QInputDialog().getInt(self, 'Ширина', 'Ширина')
         while width[0] < 1:
             if not width[1]:
@@ -80,6 +95,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.must_update_deltas = True
 
     def open(self):
+        """
+        Shows opening file dialog and opens an image
+        """
         filt = '*.bmp *.eps *.gif *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
         filename = QFileDialog.getOpenFileName(self, 'Открыть', '', filter=filt)
         if filename[1] == '':
@@ -98,6 +116,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         self.must_update_deltas = True
 
     def save(self):
+        """
+        Shows saving file dialog and saves an image
+        """
         filt = '*.bmp *.eps *.gif *.ico *.jpg *.jpeg *.pcx *.png *.ppm *.sgi *.tga *.tif *.tiff'
         filename = QFileDialog.getSaveFileName(self, 'Сохранить', '', filter=filt)
         if filename[1] == '':
@@ -126,10 +147,11 @@ class MainWindow(Ui_MainWindow, QMainWindow):
         except ValueError:
             self.statusbar.showMessage('Ошибка: неизвестное расширение файла', 5000)
 
-    def instrumented(self, x, y):
-        self.field.instrumented(self.curr_inst, x, y)
-
     def mousePressEvent(self, event):
+        """
+        Happens when user presses any mouse button
+        :param event: description of the event
+        """
         if event.button() == Qt.RightButton:
             self.drawing = False
             self.field.drawing_ended(self.curr_inst, 0, 0, True)
@@ -147,9 +169,13 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 self.must_update_deltas = False
             x, y = self.pixel_coords(event.x(), event.y())
             self.field.drawing_started(self.curr_inst, x, y)
-            self.instrumented(x, y)
+            self.field.instrumented(self.curr_inst, x, y)
 
     def mouseMoveEvent(self, event):
+        """
+        Happens when user moves a mouse while any button pressed
+        :param event: description of the event
+        """
         if not self.drawing:
             return
         x, y = self.pixel_coords(event.x(), event.y())
@@ -165,14 +191,21 @@ class MainWindow(Ui_MainWindow, QMainWindow):
                 ver.setValue(y)
             elif y >= ver.value() + ver.pageStep():
                 ver.setValue(y - ver.pageStep())
-        self.instrumented(*self.pixel_coords(event.x(), event.y()))
+        self.field.instrumented(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
 
     def mouseReleaseEvent(self, event):
+        """
+        Happens when releases a mouse button
+        :param event: description of the event
+        """
         if self.drawing:
             self.field.drawing_ended(self.curr_inst, *self.pixel_coords(event.x(), event.y()))
         self.drawing = False
 
     def update_delta_x(self):
+        """
+        Calculate the value x', mouse coords x - x' = x coords on the pixmap
+        """
         try:
             sz = self.field.pixmap().size()
         except AttributeError:
@@ -184,6 +217,9 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.delta_x = imho_geom.x() + imho_geom.width() // 2 - (sz.width() + 1) // 2
 
     def update_delta_y(self):
+        """
+        Calculate the value y', mouse coords y - y' = y coords on the pixmap
+        """
         try:
             sz = self.field.pixmap().size()
         except AttributeError:
@@ -196,21 +232,17 @@ class MainWindow(Ui_MainWindow, QMainWindow):
             self.delta_y += imho_geom.y() + imho_geom.height() // 2 - (sz.height() + 1) // 2
 
     def resizeEvent(self, event):
+        """
+        Happens when the user guesses to resize the window
+        :param event: useless information
+        """
         self.must_update_deltas = True
 
     def pixel_coords(self, x, y):
+        """
+
+        :param x: x on the window
+        :param y: y on the window
+        :return: x and y coordinates on the pixmap
+        """
         return x - self.delta_x, y - self.delta_y
-
-
-class Drawer(QThread):
-    def __init__(self, mw: MainWindow):
-        super().__init__()
-        self.mw = mw
-        self.working = False
-
-    def run(self):
-        while self.working:
-            pass
-
-    def stop(self):
-        self.working = False

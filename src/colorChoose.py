@@ -6,9 +6,21 @@ from PyQt5.QtWidgets import QPushButton, QColorDialog, QGraphicsScene
 from src.clickableGraphicsView import ClickableGraphicsView
 
 
+# noinspection DuplicatedCode
 class ColorChoose:
+    """
+    Contains two clickableGraphicsView objects
+    Allows user to choose color, saves preferences into database
+    """
     def __init__(self, fore: ClickableGraphicsView, back: ClickableGraphicsView, swap: QPushButton,
                  connection, cursor: sqlite3.Cursor):
+        """
+        :param fore: foreground color changer
+        :param back: background color changer
+        :param swap: swap colors
+        :param connection: connection to the database
+        :param cursor: connection cursor
+        """
         self.connect = connection
         self.cursor = cursor
         self.fore_scene = QGraphicsScene(fore.parent())
@@ -27,6 +39,9 @@ class ColorChoose:
         self.back_scene.addRect(-5, -5, 37, 37, QColor(*self.back_color), QColor(*self.back_color))
 
     def change_foreground(self):
+        """
+        When user changes foreground color
+        """
         color = QColorDialog.getColor()
         if color.isValid():
             self.fore_scene.addRect(-5, -5, 37, 37, color, color)
@@ -36,6 +51,9 @@ class ColorChoose:
             self.connect.commit()
 
     def change_background(self):
+        """
+        When user changes background color
+        """
         color = QColorDialog.getColor()
         if color.isValid():
             self.back_scene.addRect(-5, -5, 37, 37, color, color)
@@ -45,6 +63,9 @@ class ColorChoose:
             self.connect.commit()
 
     def swap(self):
+        """
+        Swaps colors
+        """
         self.fore_color, self.back_color = self.back_color, self.fore_color
         self.fore_scene.addRect(-5, -5, 37, 37, QColor(*self.fore_color), QColor(*self.fore_color))
         self.back_scene.addRect(-5, -5, 37, 37, QColor(*self.back_color), QColor(*self.back_color))
